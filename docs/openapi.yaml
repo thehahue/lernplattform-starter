@@ -1,0 +1,1196 @@
+openapi: 3.0.3
+info:
+  title: Lernraum REST API
+  version: 1.0.0
+  description: 'Verbindlicher Vertrag für ein separates Frontend. Session-Cookie mit credentials: include senden.
+    Schreibzugriffe benötigen X-Requested-With: Lernraum. Alle privaten Ressourcen sind auf den aktuellen Benutzer
+    beschränkt; unbekannte/fremde IDs ergeben 404. PUT ersetzt den vollständigen Zustand. Siehe API.md für fachliche
+    Beispiele.'
+servers:
+- url: http://localhost:8080/api
+security:
+- sessionCookie: []
+paths:
+  /auth/register:
+    post:
+      summary: Konto und Profil anlegen, direkt anmelden
+      operationId: postAuthRegister
+      tags:
+      - auth
+      responses:
+        '201':
+          description: Erfolg
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserView'
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '409':
+          $ref: '#/components/responses/Error409'
+      security: []
+      parameters:
+      - $ref: '#/components/parameters/WriteHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+  /auth/login:
+    post:
+      summary: Anmelden und Session ersetzen
+      operationId: postAuthLogin
+      tags:
+      - auth
+      responses:
+        '200':
+          description: Erfolg
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserView'
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '409':
+          $ref: '#/components/responses/Error409'
+      security: []
+      parameters:
+      - $ref: '#/components/parameters/WriteHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+  /auth/logout:
+    post:
+      summary: Session beenden
+      operationId: postAuthLogout
+      tags:
+      - auth
+      responses:
+        '204':
+          description: Erfolg
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '409':
+          $ref: '#/components/responses/Error409'
+      security: []
+      parameters:
+      - $ref: '#/components/parameters/WriteHeader'
+  /auth/me:
+    get:
+      summary: Aktuellen Benutzer mit Profil lesen
+      operationId: getAuthMe
+      tags:
+      - auth
+      responses:
+        '200':
+          description: Erfolg
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserView'
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '409':
+          $ref: '#/components/responses/Error409'
+  /profile:
+    put:
+      summary: Eigenes Profil ersetzen
+      operationId: putProfile
+      tags:
+      - profile
+      responses:
+        '200':
+          description: Erfolg
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserView'
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '409':
+          $ref: '#/components/responses/Error409'
+      parameters:
+      - $ref: '#/components/parameters/WriteHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProfileRequest'
+  /dashboard:
+    get:
+      summary: Persönliche Zusammenfassung
+      operationId: getDashboard
+      tags:
+      - dashboard
+      responses:
+        '200':
+          description: Erfolg
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DashboardView'
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '409':
+          $ref: '#/components/responses/Error409'
+      description: 'Nur eigene Daten. Offen = TODO/IN_PROGRESS; überfällig = offen und Termin vor heute; erledigt
+        = DONE. Prozent gerundet, ohne Aufgaben 0. upcomingTasks: maximal sechs offene datierte Aufgaben, einschließlich
+        überfälliger, nach Termin/ID sortiert.'
+  /subjects:
+    get:
+      summary: Fach-Liste lesen
+      operationId: getSubjects
+      tags:
+      - subjects
+      responses:
+        '200':
+          description: Erfolg
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SubjectView'
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '409':
+          $ref: '#/components/responses/Error409'
+      description: Eigene Fächer, nach Namen aufsteigend.
+    post:
+      summary: Fach anlegen
+      operationId: postSubjects
+      tags:
+      - subjects
+      responses:
+        '201':
+          description: Erfolg
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubjectView'
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '409':
+          $ref: '#/components/responses/Error409'
+      parameters:
+      - $ref: '#/components/parameters/WriteHeader'
+      description: 'Besitzer kommt aus der Session. name/description werden außen getrimmt; Farben sind #RRGGBB.'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubjectRequest'
+  /subjects/{id}:
+    put:
+      summary: Fach vollständig bearbeiten
+      operationId: putSubjectsId
+      tags:
+      - subjects
+      responses:
+        '200':
+          description: Erfolg
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubjectView'
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '409':
+          $ref: '#/components/responses/Error409'
+      parameters:
+      - $ref: '#/components/parameters/Id'
+      - $ref: '#/components/parameters/WriteHeader'
+      description: 'Besitzer kommt aus der Session. name/description werden außen getrimmt; Farben sind #RRGGBB.'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubjectRequest'
+    delete:
+      summary: Fach löschen
+      operationId: deleteSubjectsId
+      tags:
+      - subjects
+      responses:
+        '204':
+          description: Erfolg
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '409':
+          $ref: '#/components/responses/Error409'
+      parameters:
+      - $ref: '#/components/parameters/Id'
+      - $ref: '#/components/parameters/WriteHeader'
+      description: 'Bei vorhandenen Themen: 409.'
+  /topics:
+    get:
+      summary: Thema-Liste lesen
+      operationId: getTopics
+      tags:
+      - topics
+      responses:
+        '200':
+          description: Erfolg
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TopicView'
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '409':
+          $ref: '#/components/responses/Error409'
+      parameters:
+      - $ref: '#/components/parameters/subjectId'
+      description: Flache Liste eigener Themen. Ohne Filter fachweise nach Fachnamen, darin nach Themennamen. parentId=null
+        kennzeichnet Hauptthemen.
+    post:
+      summary: Thema anlegen
+      operationId: postTopics
+      tags:
+      - topics
+      responses:
+        '201':
+          description: Erfolg
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TopicView'
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '409':
+          $ref: '#/components/responses/Error409'
+      parameters:
+      - $ref: '#/components/parameters/WriteHeader'
+      description: Elternteil muss zum gleichen Fach gehören. Keine direkten oder indirekten Zyklen. subjectId eines
+        bestehenden Themas darf nicht verändert werden.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TopicRequest'
+  /topics/{id}:
+    put:
+      summary: Thema vollständig bearbeiten
+      operationId: putTopicsId
+      tags:
+      - topics
+      responses:
+        '200':
+          description: Erfolg
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TopicView'
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '409':
+          $ref: '#/components/responses/Error409'
+      parameters:
+      - $ref: '#/components/parameters/Id'
+      - $ref: '#/components/parameters/WriteHeader'
+      description: Elternteil muss zum gleichen Fach gehören. Keine direkten oder indirekten Zyklen. subjectId eines
+        bestehenden Themas darf nicht verändert werden.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TopicRequest'
+    delete:
+      summary: Thema löschen
+      operationId: deleteTopicsId
+      tags:
+      - topics
+      responses:
+        '204':
+          description: Erfolg
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '409':
+          $ref: '#/components/responses/Error409'
+      parameters:
+      - $ref: '#/components/parameters/Id'
+      - $ref: '#/components/parameters/WriteHeader'
+      description: 'Bei Unterthemen oder Aufgaben: 409.'
+  /tasks:
+    get:
+      summary: Aufgabe-Liste lesen
+      operationId: getTasks
+      tags:
+      - tasks
+      responses:
+        '200':
+          description: Erfolg
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TaskView'
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '409':
+          $ref: '#/components/responses/Error409'
+      parameters:
+      - $ref: '#/components/parameters/subjectId'
+      - $ref: '#/components/parameters/topicId'
+      - $ref: '#/components/parameters/status'
+      - $ref: '#/components/parameters/tagId'
+      - $ref: '#/components/parameters/q'
+      description: 'Alle Filter mit UND. topicId bezieht sich exakt auf das Thema, ohne Unterthemen. Sortierung:
+        dueDate aufsteigend, NULL zuletzt, danach ID.'
+    post:
+      summary: Aufgabe anlegen
+      operationId: postTasks
+      tags:
+      - tasks
+      responses:
+        '201':
+          description: Erfolg
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskView'
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '409':
+          $ref: '#/components/responses/Error409'
+      parameters:
+      - $ref: '#/components/parameters/WriteHeader'
+      description: tagIds ersetzt alle Zuordnungen (auch [] zulässig), nur eigene Tags. Aufgabe und Zuordnungen
+        atomar. Thema darf gewechselt werden, wenn es dem Benutzer gehört.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskRequest'
+  /tasks/{id}:
+    put:
+      summary: Aufgabe vollständig bearbeiten
+      operationId: putTasksId
+      tags:
+      - tasks
+      responses:
+        '200':
+          description: Erfolg
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskView'
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '409':
+          $ref: '#/components/responses/Error409'
+      parameters:
+      - $ref: '#/components/parameters/Id'
+      - $ref: '#/components/parameters/WriteHeader'
+      description: tagIds ersetzt alle Zuordnungen (auch [] zulässig), nur eigene Tags. Aufgabe und Zuordnungen
+        atomar. Thema darf gewechselt werden, wenn es dem Benutzer gehört.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskRequest'
+    delete:
+      summary: Aufgabe löschen
+      operationId: deleteTasksId
+      tags:
+      - tasks
+      responses:
+        '204':
+          description: Erfolg
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '409':
+          $ref: '#/components/responses/Error409'
+      parameters:
+      - $ref: '#/components/parameters/Id'
+      - $ref: '#/components/parameters/WriteHeader'
+      description: Entfernt Zuordnungen in task_tag; Datensätze auf der anderen Seite bleiben bestehen.
+    get:
+      summary: Einzelne eigene Aufgabe lesen
+      operationId: getTasksId
+      tags:
+      - tasks
+      responses:
+        '200':
+          description: Erfolg
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskView'
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '409':
+          $ref: '#/components/responses/Error409'
+      parameters:
+      - $ref: '#/components/parameters/Id'
+  /tags:
+    get:
+      summary: Schlagwort-Liste lesen
+      operationId: getTags
+      tags:
+      - tags
+      responses:
+        '200':
+          description: Erfolg
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TagView'
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '409':
+          $ref: '#/components/responses/Error409'
+      description: Eigene Schlagwörter, nach Namen aufsteigend.
+    post:
+      summary: Schlagwort anlegen
+      operationId: postTags
+      tags:
+      - tags
+      responses:
+        '201':
+          description: Erfolg
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TagView'
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '409':
+          $ref: '#/components/responses/Error409'
+      parameters:
+      - $ref: '#/components/parameters/WriteHeader'
+      description: Name wird außen getrimmt und kleingeschrieben. Pro Benutzer eindeutig.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TagRequest'
+  /tags/{id}:
+    put:
+      summary: Schlagwort vollständig bearbeiten
+      operationId: putTagsId
+      tags:
+      - tags
+      responses:
+        '200':
+          description: Erfolg
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TagView'
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '409':
+          $ref: '#/components/responses/Error409'
+      parameters:
+      - $ref: '#/components/parameters/Id'
+      - $ref: '#/components/parameters/WriteHeader'
+      description: Name wird außen getrimmt und kleingeschrieben. Pro Benutzer eindeutig.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TagRequest'
+    delete:
+      summary: Schlagwort löschen
+      operationId: deleteTagsId
+      tags:
+      - tags
+      responses:
+        '204':
+          description: Erfolg
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '409':
+          $ref: '#/components/responses/Error409'
+      parameters:
+      - $ref: '#/components/parameters/Id'
+      - $ref: '#/components/parameters/WriteHeader'
+      description: Entfernt Zuordnungen in task_tag; Datensätze auf der anderen Seite bleiben bestehen.
+components:
+  securitySchemes:
+    sessionCookie:
+      type: apiKey
+      in: cookie
+      name: JSESSIONID
+  parameters:
+    WriteHeader:
+      name: X-Requested-With
+      in: header
+      required: true
+      schema:
+        type: string
+        enum:
+        - Lernraum
+      description: Bei jedem POST, PUT und DELETE erforderlich.
+    Id:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: integer
+        format: int64
+        minimum: 1
+    subjectId:
+      name: subjectId
+      in: query
+      required: false
+      schema:
+        type: integer
+        format: int64
+        minimum: 1
+    topicId:
+      name: topicId
+      in: query
+      required: false
+      schema:
+        type: integer
+        format: int64
+        minimum: 1
+    tagId:
+      name: tagId
+      in: query
+      required: false
+      schema:
+        type: integer
+        format: int64
+        minimum: 1
+    status:
+      name: status
+      in: query
+      required: false
+      schema:
+        $ref: '#/components/schemas/TaskStatus'
+    q:
+      name: q
+      in: query
+      required: false
+      schema:
+        type: string
+      description: Teilstring in Titel und Beschreibung; ohne Groß-/Kleinschreibung.
+  responses:
+    Error400:
+      description: Ungültige Eingabe oder Beziehung
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+    Error401:
+      description: Anmeldung erforderlich oder Zugangsdaten falsch
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+    Error403:
+      description: Schreibzugriffs-Header fehlt/ist ungültig
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+    Error404:
+      description: Eintrag unbekannt oder fremd
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+    Error409:
+      description: Eintrag vergeben oder noch verwendet
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+  schemas:
+    ApiError:
+      type: object
+      required:
+      - status
+      - message
+      - errors
+      properties:
+        status:
+          type: integer
+        message:
+          type: string
+        errors:
+          type: object
+          additionalProperties:
+            type: string
+    TaskStatus:
+      type: string
+      enum:
+      - TODO
+      - IN_PROGRESS
+      - DONE
+    Priority:
+      type: string
+      enum:
+      - LOW
+      - NORMAL
+      - HIGH
+    LoginRequest:
+      type: object
+      required:
+      - username
+      - password
+      properties:
+        username:
+          type: string
+          maxLength: 40
+          minLength: 1
+          pattern: .*\S.*
+          description: Nicht leer oder nur Whitespace; äußere Leerzeichen werden entfernt.
+        password:
+          type: string
+          maxLength: 128
+          minLength: 1
+          writeOnly: true
+      additionalProperties: false
+    RegisterRequest:
+      type: object
+      required:
+      - username
+      - password
+      - displayName
+      properties:
+        username:
+          type: string
+          maxLength: 40
+          minLength: 3
+          pattern: ^[a-zA-Z0-9._-]{3,40}$
+        password:
+          type: string
+          maxLength: 128
+          minLength: 8
+          writeOnly: true
+        displayName:
+          type: string
+          maxLength: 80
+          minLength: 1
+          pattern: .*\S.*
+          description: Nicht leer oder nur Whitespace; äußere Leerzeichen werden entfernt.
+      additionalProperties: false
+    ProfileRequest:
+      type: object
+      required:
+      - displayName
+      - learningGoal
+      - dailyMinutes
+      properties:
+        displayName:
+          type: string
+          maxLength: 80
+          minLength: 1
+          pattern: .*\S.*
+          description: Nicht leer oder nur Whitespace; äußere Leerzeichen werden entfernt.
+        learningGoal:
+          type: string
+          maxLength: 500
+        dailyMinutes:
+          type: integer
+          minimum: 5
+          maximum: 480
+      additionalProperties: false
+    UserProfile:
+      type: object
+      required:
+      - id
+      - userId
+      - displayName
+      - learningGoal
+      - dailyMinutes
+      properties:
+        id:
+          type: integer
+          format: int64
+          minimum: 1
+        userId:
+          type: integer
+          format: int64
+          minimum: 1
+        displayName:
+          type: string
+          maxLength: 80
+          minLength: 1
+          pattern: .*\S.*
+          description: Nicht leer oder nur Whitespace; äußere Leerzeichen werden entfernt.
+        learningGoal:
+          type: string
+          maxLength: 500
+        dailyMinutes:
+          type: integer
+          minimum: 5
+          maximum: 480
+    UserView:
+      type: object
+      required:
+      - id
+      - username
+      - profile
+      properties:
+        id:
+          type: integer
+          format: int64
+          minimum: 1
+        username:
+          type: string
+          maxLength: 40
+        profile:
+          $ref: '#/components/schemas/UserProfile'
+    SubjectRequest:
+      type: object
+      required:
+      - name
+      - description
+      - color
+      properties:
+        name:
+          type: string
+          maxLength: 80
+          minLength: 1
+          pattern: .*\S.*
+          description: Nicht leer oder nur Whitespace; äußere Leerzeichen werden entfernt.
+        description:
+          type: string
+          maxLength: 1000
+        color:
+          type: string
+          pattern: ^#[0-9a-fA-F]{6}$
+      additionalProperties: false
+    SubjectView:
+      type: object
+      required:
+      - id
+      - name
+      - description
+      - color
+      properties:
+        id:
+          type: integer
+          format: int64
+          minimum: 1
+        name:
+          type: string
+          maxLength: 80
+          minLength: 1
+          pattern: .*\S.*
+          description: Nicht leer oder nur Whitespace; äußere Leerzeichen werden entfernt.
+        description:
+          type: string
+          maxLength: 1000
+        color:
+          type: string
+          pattern: ^#[0-9a-fA-F]{6}$
+    TopicRequest:
+      type: object
+      required:
+      - subjectId
+      - name
+      - notes
+      properties:
+        subjectId:
+          type: integer
+          format: int64
+          minimum: 1
+        parentId:
+          type: integer
+          format: int64
+          minimum: 1
+          nullable: true
+        name:
+          type: string
+          maxLength: 100
+          minLength: 1
+          pattern: .*\S.*
+          description: Nicht leer oder nur Whitespace; äußere Leerzeichen werden entfernt.
+        notes:
+          type: string
+          maxLength: 4000
+      additionalProperties: false
+    TopicView:
+      type: object
+      required:
+      - id
+      - subjectId
+      - parentId
+      - name
+      - notes
+      properties:
+        id:
+          type: integer
+          format: int64
+          minimum: 1
+        subjectId:
+          type: integer
+          format: int64
+          minimum: 1
+        parentId:
+          type: integer
+          format: int64
+          minimum: 1
+          nullable: true
+        name:
+          type: string
+          maxLength: 100
+          minLength: 1
+          pattern: .*\S.*
+          description: Nicht leer oder nur Whitespace; äußere Leerzeichen werden entfernt.
+        notes:
+          type: string
+          maxLength: 4000
+    TaskRequest:
+      type: object
+      required:
+      - topicId
+      - title
+      - description
+      - status
+      - priority
+      - tagIds
+      properties:
+        topicId:
+          type: integer
+          format: int64
+          minimum: 1
+        title:
+          type: string
+          maxLength: 140
+          minLength: 1
+          pattern: .*\S.*
+          description: Nicht leer oder nur Whitespace; äußere Leerzeichen werden entfernt.
+        description:
+          type: string
+          maxLength: 4000
+        status:
+          $ref: '#/components/schemas/TaskStatus'
+        priority:
+          $ref: '#/components/schemas/Priority'
+        dueDate:
+          type: string
+          format: date
+          nullable: true
+        tagIds:
+          type: array
+          items:
+            type: integer
+            format: int64
+            minimum: 1
+          maxItems: 20
+          uniqueItems: true
+      additionalProperties: false
+    TaskView:
+      type: object
+      required:
+      - id
+      - subjectId
+      - topicId
+      - title
+      - description
+      - status
+      - priority
+      - dueDate
+      - tagIds
+      properties:
+        id:
+          type: integer
+          format: int64
+          minimum: 1
+        subjectId:
+          type: integer
+          format: int64
+          minimum: 1
+        topicId:
+          type: integer
+          format: int64
+          minimum: 1
+        title:
+          type: string
+          maxLength: 140
+          minLength: 1
+          pattern: .*\S.*
+          description: Nicht leer oder nur Whitespace; äußere Leerzeichen werden entfernt.
+        description:
+          type: string
+          maxLength: 4000
+        status:
+          $ref: '#/components/schemas/TaskStatus'
+        priority:
+          $ref: '#/components/schemas/Priority'
+        dueDate:
+          type: string
+          format: date
+          nullable: true
+        tagIds:
+          type: array
+          items:
+            type: integer
+            format: int64
+            minimum: 1
+          maxItems: 20
+          uniqueItems: true
+    TagRequest:
+      type: object
+      required:
+      - name
+      properties:
+        name:
+          type: string
+          maxLength: 30
+          minLength: 1
+          pattern: .*\S.*
+          description: Nicht leer oder nur Whitespace; äußere Leerzeichen werden entfernt.
+      additionalProperties: false
+    TagView:
+      type: object
+      required:
+      - id
+      - name
+      properties:
+        id:
+          type: integer
+          format: int64
+          minimum: 1
+        name:
+          type: string
+          maxLength: 30
+    SubjectProgress:
+      type: object
+      required:
+      - id
+      - name
+      - color
+      - total
+      - done
+      - percent
+      properties:
+        id:
+          type: integer
+          format: int64
+          minimum: 1
+        name:
+          type: string
+          maxLength: 80
+        color:
+          type: string
+        total:
+          type: integer
+          minimum: 0
+        done:
+          type: integer
+          minimum: 0
+        percent:
+          type: integer
+          minimum: 0
+          maximum: 100
+    DashboardView:
+      type: object
+      required:
+      - displayName
+      - learningGoal
+      - dailyMinutes
+      - subjectCount
+      - totalTasks
+      - openTasks
+      - doneTasks
+      - overdueTasks
+      - dueTodayTasks
+      - progressPercent
+      - subjects
+      - upcomingTasks
+      properties:
+        displayName:
+          type: string
+          maxLength: 80
+        learningGoal:
+          type: string
+          maxLength: 500
+        dailyMinutes:
+          type: integer
+          minimum: 5
+          maximum: 480
+        subjectCount:
+          type: integer
+          minimum: 0
+        totalTasks:
+          type: integer
+          minimum: 0
+        openTasks:
+          type: integer
+          minimum: 0
+        doneTasks:
+          type: integer
+          minimum: 0
+        overdueTasks:
+          type: integer
+          minimum: 0
+        dueTodayTasks:
+          type: integer
+          minimum: 0
+        progressPercent:
+          type: integer
+          minimum: 0
+          maximum: 100
+        subjects:
+          type: array
+          items:
+            $ref: '#/components/schemas/SubjectProgress'
+        upcomingTasks:
+          type: array
+          items:
+            $ref: '#/components/schemas/TaskView'
+          maxItems: 6

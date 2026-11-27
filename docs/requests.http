@@ -1,0 +1,99 @@
+# IntelliJ HTTP Client / VS Code REST Client mit aktivierter Cookie-Verwaltung.
+# Zielanfragen für das selbst zu implementierende Backend. Anfangs liefern API-Aufrufe 404.
+# Es gibt keine vorbereiteten Konten. Zuerst registrieren; beim Wiederholen anmelden.
+# Der Client muss Set-Cookie aus Login/Register in den folgenden Requests mitsenden.
+# IDs aus den Antworten in die Variablen unten übernehmen, nicht blind aufrufen.
+@base = http://localhost:8080/api
+@subjectId = 1
+@topicId = 1
+@taskId = 1
+@tagId = 1
+
+### 1. Erstes Konto anlegen und direkt anmelden (einmal pro Benutzername)
+POST {{base}}/auth/register
+Content-Type: application/json
+X-Requested-With: Lernraum
+
+{"username":"samira","password":"Lernen123!","displayName":"Samira"}
+
+### 2. Session prüfen
+GET {{base}}/auth/me
+
+### 3. Dashboard
+GET {{base}}/dashboard
+
+### 4. Fächer lesen
+GET {{base}}/subjects
+
+### 5. Neues Fach, dessen ID oben als subjectId übernehmen
+POST {{base}}/subjects
+Content-Type: application/json
+X-Requested-With: Lernraum
+
+{"name":"SQL-Werkstatt","description":"JOINs verstehen","color":"#138a78"}
+
+### 6. Thema, dessen ID oben als topicId übernehmen
+POST {{base}}/topics
+Content-Type: application/json
+X-Requested-With: Lernraum
+
+{"subjectId":{{subjectId}},"parentId":null,"name":"JOINs","notes":"Erst mit zwei Tabellen beginnen."}
+
+### 7. Themen eines Fachs lesen
+GET {{base}}/topics?subjectId={{subjectId}}
+
+### 8. Schlagwort, dessen ID oben als tagId übernehmen
+POST {{base}}/tags
+Content-Type: application/json
+X-Requested-With: Lernraum
+
+{"name":"werkstatt"}
+
+### 9. Aufgabe mit Zuordnung, deren ID oben als taskId übernehmen
+POST {{base}}/tasks
+Content-Type: application/json
+X-Requested-With: Lernraum
+
+{"topicId":{{topicId}},"title":"Zwei Tabellen verbinden","description":"Den Fremdschlüssel im JOIN verwenden.","status":"TODO","priority":"NORMAL","dueDate":null,"tagIds":[{{tagId}}]}
+
+### 10. Nur passende Aufgaben lesen
+GET {{base}}/tasks?status=TODO&tagId={{tagId}}&q=Tabellen
+
+### 11. Aufgabe fertigstellen und alle Tags entfernen
+PUT {{base}}/tasks/{{taskId}}
+Content-Type: application/json
+X-Requested-With: Lernraum
+
+{"topicId":{{topicId}},"title":"Zwei Tabellen verbinden","description":"Den Fremdschlüssel im JOIN verwenden.","status":"DONE","priority":"NORMAL","dueDate":null,"tagIds":[]}
+
+### 12. Negativfall: belegtes Thema darf nicht gelöscht werden (409)
+DELETE {{base}}/topics/{{topicId}}
+X-Requested-With: Lernraum
+
+### 13. Negativfall: ungültiger Name (400)
+POST {{base}}/subjects
+Content-Type: application/json
+X-Requested-With: Lernraum
+
+{"name":"   ","description":"","color":"#138a78"}
+
+### 14. Profil
+PUT {{base}}/profile
+Content-Type: application/json
+X-Requested-With: Lernraum
+
+{"displayName":"Samira","learningGoal":"JOINs wirklich verstehen.","dailyMinutes":45}
+
+### 15. Abmelden
+POST {{base}}/auth/logout
+X-Requested-With: Lernraum
+
+### 16. Ohne Session nicht erlaubt (401)
+GET {{base}}/subjects
+
+### Optional: bei späteren Starts mit bestehendem Konto anmelden
+POST {{base}}/auth/login
+Content-Type: application/json
+X-Requested-With: Lernraum
+
+{"username":"samira","password":"Lernen123!"}
